@@ -1,0 +1,17 @@
+# Environments
+venv/
+env/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.h5
+*.tflite
+
+# OS
+.DS_Store
+
+# F Prime Build
+build-fprime/
+fprime-build/
