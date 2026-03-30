@@ -1,84 +1,125 @@
 # Transient Space Event Detector (TSED)
 
-> [!WARNING]
-> **Project Status: Incomplete**
-> This project is currently in a prototype phase and is not a fully functional, flight-ready system. 
-> **Why it is incomplete:** While the machine learning pipeline and the F Prime component structure have been established, the CNN model has only been trained on proxy data (Fashion MNIST) rather than actual astronomical transient datasets (due to the large size and specific preprocessing requirements of astronomical data). Furthermore, the complete hardware-in-the-loop testing on the actual RP2350 with a real camera sensor interface has not yet been finalized.
+> An autonomous, ultra-lightweight CNN system for detecting transient space events on the RP2350 microcontroller using F Prime.
 
 ## Overview
-This project implements an end-to-end **Autonomous Transient Space Event Detector** designed for the **Raspberry Pi RP2350** microcontroller using the **F Prime (F')** flight software framework. It features an ultra-lightweight Convolutional Neural Network (CNN) trained on astronomical data (currently modeled via a proxy dataset), quantized to INT8 for efficient edge inference.
+
+This project implements an end-to-end **Autonomous Transient Space Event Detector** designed for the **Raspberry Pi RP2350** (Pico 2) using the **F Prime (F')** flight software framework. It features an ultra-lightweight Convolutional Neural Network trained on synthetic astronomical data, quantized to INT8 for efficient edge inference on a Cortex-M33 MCU.
+
+## Key Results
+
+| Metric | Value |
+|--------|-------|
+| **Float32 Accuracy** | 99.35% |
+| **INT8 Accuracy** | 98.80% |
+| **Quantization Drop** | 0.55% |
+| **Model Size (INT8)** | 12 KB |
+| **Parameters** | 2,756 |
+| **Simulation Accuracy** | 95.0% |
+| **False Positive Rate** | 0.0% |
 
 ## Purpose
-Space-based telescopes and satellites generate massive amounts of image data. The goal of this project is to provide a low-power, "on-the-edge" detection system that can autonomously identify transient events (like supernovae, blazars, or fast radio bursts) locally on the spacecraft. This enables real-time alerting and selective downlinking of high-interest data, conserving valuable bandwidth and energy.
 
-## Extrapolation & Future Applications
-While currently scoped for transient astronomical events, this AI pipeline and F Prime deployment strategy can be extrapolated to various edge-AI applications in aerospace and robotics:
-- **Autonomous Navigation**: Processing star-tracker or terrain camera data on the edge for pose estimation.
-- **Earth Observation**: Detecting specific terrestrial phenomena (e.g., wildfires, algal blooms) directly from CubeSats.
-- **Debris Tracking**: Identifying space debris moving against the star background in real-time.
-- **Predictive Maintenance**: Analyzing acoustic or vibration data from internal spacecraft components using 1D adaptations of the CNN before transmitting health status.
+Space-based telescopes and satellites generate massive amounts of image data. This system provides a low-power, "on-the-edge" detection that autonomously identifies transient events directly on the spacecraft. The CNN classifies 64×64 grayscale camera frames into four categories:
+
+| Class | Description | Action |
+|-------|-------------|--------|
+| `transient` | Asteroid, debris, comet streaks | **TRIGGER EVENT** |
+| `starfield` | Normal star background | Ignore |
+| `bright_source` | Sun, Moon, bright planets | Ignore |
+| `earth_limb` | Earth horizon / atmospheric glow | Ignore |
 
 ## Project Structure
+
 ```text
 .
-├── ml_pipeline/                # Machine Learning Pipeline (Python)
-│   ├── train.py                # CNN Training script (Fashion MNIST proxy)
-│   ├── quantize.py             # Post-Training Quantization to INT8
-│   ├── export_to_c.py          # TF Lite to C-header converter
-│   └── setup_ml.sh             # Environment setup script
-└── fprime_workspace/           # F Prime Deployment
-    └── Components/
-        └── TransientDetector/  # F' Component for TFLite Micro inference
+├── ml_pipeline/                    # Machine Learning Pipeline (Python)
+│   ├── generate_dataset.py         # Synthetic 4-class dataset generator
+│   ├── train.py                    # CNN training with cosine LR + early stopping
+│   ├── quantize.py                 # Post-training INT8 quantization
+│   ├── evaluate.py                 # Metrics, confusion matrix, edge cases
+│   ├── simulate.py                 # 6-scenario simulation with results
+│   ├── export_to_c.py              # TFLite → C-header converter
+│   ├── simulate_visual.html        # Interactive results dashboard
+│   └── requirements.txt            # Python dependencies
+├── fprime_workspace/               # F Prime Deployment
+│   └── Components/
+│       └── TransientDetector/      # F' Component for TFLite Micro inference
+├── DEPLOY_GUIDE.md                 # RP2350 deployment instructions
+└── README.md
 ```
 
-## Libraries & Dependencies
-The machine learning pipeline requires the following Python libraries:
-- `tensorflow >= 2.15.0` (for model building, training, and INT8 quantization)
-- `numpy` (for data manipulation)
-- `binascii` (standard Python library, for C-header export)
+## Quick Start
 
-The deployment environment requires:
-- **F Prime (F')** Flight Software Framework
-- **TensorFlow Lite Micro** (integrated within the F Prime build system)
-- **RP2350 BSP** (Board Support Package) for F Prime compilation
-- **CMake** & **GCC ARM Embedded Toolchain** (for compiling targeting the MCU)
+### 1. Setup Environment
+
+```bash
+cd ml_pipeline
+python3.11 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 2. Generate Dataset & Train
+
+```bash
+python3 generate_dataset.py        # 20K train + 4K test synthetic images
+python3 train.py                   # Train CNN (reaches ~99.3% accuracy)
+```
+
+### 3. Quantize & Export
+
+```bash
+python3 quantize.py --model output/transient_cnn_fp32.keras
+python3 export_to_c.py             # Generates model_data.h for F Prime
+```
+
+### 4. Evaluate & Simulate
+
+```bash
+python3 evaluate.py                # Confusion matrix + edge case testing
+python3 simulate.py                # Run 6 visual test scenarios
+```
+
+### 5. View Results
+
+Open `simulate_visual.html` in a browser to see the interactive dashboard, or view the generated images in `output/simulation/`.
+
+## Architecture
+
+```
+Input (64×64×1 INT8)
+  ↓
+Conv2D(16, 3×3, stride=2) → BN → ReLU          → 32×32×16
+  ↓
+DepthwiseConv2D(3×3, stride=2) → BN → ReLU      → 16×16×16
+Conv2D(32, 1×1) → BN → ReLU                     → 16×16×32
+  ↓
+DepthwiseConv2D(3×3, stride=2) → BN → ReLU      → 8×8×32
+Conv2D(32, 1×1) → BN → ReLU                     → 8×8×32
+  ↓
+GlobalAveragePooling2D                           → 32
+  ↓
+Dense(4, softmax)                                → 4 classes
+```
+
+**Total: 2,756 parameters (10.77 KB float32, 12 KB INT8 quantized)**
 
 ## Hardware Requirements
-- **Microcontroller**: Raspberry Pi RP2350 (e.g., Pico 2)
-- **Memory**: 520KB SRAM (RP2350 standard)
-- **Input**: 64x64 Grayscale image buffer (via F Prime `imageIn` port)
 
-## Technical Specifications & RAM Requirements
-- **Model Architecture**: Lightweight CNN with Depthwise Separable Convolutions.
-- **Quantization**: Full INT8 (input/output/activations).
-- **RAM Usage (Inference)**:
-    - **Tensor Arena**: ~120 KB (defined in `TransientDetector.hpp`).
-    - **Total SRAM Impact**: Fits comfortably within the RP2350's 520KB limit, leaving ~400KB for other F Prime services.
-- **Latency**: Sub-50ms inference times (estimated on RP2350).
+- **Microcontroller**: Raspberry Pi RP2350 (Pico 2)
+- **SRAM**: 520 KB (model uses ~120 KB tensor arena)
+- **Flash**: 16 MB (model uses ~12 KB)
+- **Camera**: Any grayscale camera producing 64×64 frames (e.g., HM01B0, ArduCAM)
 
-## Quick Start Instructions
+## Deployment
 
-### 1. Training & Exporting the Model
-1. Navigate to the `ml_pipeline/` directory.
-2. Run `./setup_ml.sh` to initialize the environment.
-3. Activate the environment: `source venv/bin/activate`
-4. Train the model: `python3 train.py`
-5. Quantize and export to C header:
-   ```bash
-   python3 quantize.py
-   python3 export_to_c.py
-   ```
-
-### 2. Building F Prime
-1. Ensure your F Prime environment is set up and targeting `rp2350-pico`.
-2. Build the project:
-   ```bash
-   fprime-util build rp2350-pico
-   ```
-
-## Key Notes
-- **Working with Real Data**: The training script currently uses `Fashion MNIST` as a proxy dataset to demonstrate the pipeline. For your domain-specific use case, you should replace the data loading logic in `train.py` with actual astronomical FITS or JPEG datasets.
-- **Normalization**: The F Prime component assumes the input image is `uint8` and internally normalizes it to the `int8` range `[-128, 127]` before feeding it into the interpreter.
+See [DEPLOY_GUIDE.md](DEPLOY_GUIDE.md) for complete instructions on:
+- Building with Pico SDK + CMSIS-NN
+- Generating and flashing UF2 firmware
+- Camera wiring and interface
+- Memory budget breakdown
 
 ## License
+
 MIT

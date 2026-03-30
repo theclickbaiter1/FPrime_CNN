@@ -1,0 +1,663 @@
+{
+  "scenarios": [
+    {
+      "name": "Asteroid Flyby",
+      "frames": [
+        {
+          "frame_idx": 0,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.99609375,
+            "starfield": 0.0,
+            "bright_source": 0.0,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 1,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.68359375,
+            "starfield": 0.046875,
+            "bright_source": 0.2265625,
+            "earth_limb": 0.0390625
+          },
+          "confidence": 0.68359375,
+          "correct": true
+        },
+        {
+          "frame_idx": 2,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.99609375,
+            "starfield": 0.0,
+            "bright_source": 0.0,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 3,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.9609375,
+            "starfield": 0.02734375,
+            "bright_source": 0.0078125,
+            "earth_limb": 0.00390625
+          },
+          "confidence": 0.9609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 4,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 2,
+          "pred_class": "bright_source",
+          "probabilities": {
+            "transient": 0.44140625,
+            "starfield": 0.02734375,
+            "bright_source": 0.515625,
+            "earth_limb": 0.015625
+          },
+          "confidence": 0.515625,
+          "correct": false
+        },
+        {
+          "frame_idx": 5,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.8984375,
+            "starfield": 0.0625,
+            "bright_source": 0.02734375,
+            "earth_limb": 0.01171875
+          },
+          "confidence": 0.8984375,
+          "correct": true
+        },
+        {
+          "frame_idx": 6,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.93359375,
+            "starfield": 0.046875,
+            "bright_source": 0.01171875,
+            "earth_limb": 0.0078125
+          },
+          "confidence": 0.93359375,
+          "correct": true
+        },
+        {
+          "frame_idx": 7,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 2,
+          "pred_class": "bright_source",
+          "probabilities": {
+            "transient": 0.16796875,
+            "starfield": 0.01171875,
+            "bright_source": 0.80859375,
+            "earth_limb": 0.01171875
+          },
+          "confidence": 0.80859375,
+          "correct": false
+        }
+      ],
+      "correct": 6,
+      "total": 8,
+      "accuracy": 0.75
+    },
+    {
+      "name": "Sun Crossing (should NOT trigger)",
+      "frames": [
+        {
+          "frame_idx": 0,
+          "true_label": 2,
+          "true_class": "bright_source",
+          "pred_label": 2,
+          "pred_class": "bright_source",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.99609375,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 1,
+          "true_label": 2,
+          "true_class": "bright_source",
+          "pred_label": 2,
+          "pred_class": "bright_source",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.99609375,
+            "earth_limb": 0.00390625
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 2,
+          "true_label": 2,
+          "true_class": "bright_source",
+          "pred_label": 2,
+          "pred_class": "bright_source",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.99609375,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 3,
+          "true_label": 2,
+          "true_class": "bright_source",
+          "pred_label": 2,
+          "pred_class": "bright_source",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.99609375,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 4,
+          "true_label": 2,
+          "true_class": "bright_source",
+          "pred_label": 2,
+          "pred_class": "bright_source",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.99609375,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 5,
+          "true_label": 2,
+          "true_class": "bright_source",
+          "pred_label": 2,
+          "pred_class": "bright_source",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.99609375,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 6,
+          "true_label": 2,
+          "true_class": "bright_source",
+          "pred_label": 2,
+          "pred_class": "bright_source",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.99609375,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 7,
+          "true_label": 2,
+          "true_class": "bright_source",
+          "pred_label": 2,
+          "pred_class": "bright_source",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.99609375,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        }
+      ],
+      "correct": 8,
+      "total": 8,
+      "accuracy": 1.0
+    },
+    {
+      "name": "Debris Field",
+      "frames": [
+        {
+          "frame_idx": 0,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.9453125,
+            "starfield": 0.03515625,
+            "bright_source": 0.01171875,
+            "earth_limb": 0.0078125
+          },
+          "confidence": 0.9453125,
+          "correct": true
+        },
+        {
+          "frame_idx": 1,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.87890625,
+            "starfield": 0.08203125,
+            "bright_source": 0.0234375,
+            "earth_limb": 0.01171875
+          },
+          "confidence": 0.87890625,
+          "correct": true
+        },
+        {
+          "frame_idx": 2,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.80078125,
+            "starfield": 0.08984375,
+            "bright_source": 0.08984375,
+            "earth_limb": 0.0234375
+          },
+          "confidence": 0.80078125,
+          "correct": true
+        },
+        {
+          "frame_idx": 3,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.9609375,
+            "starfield": 0.02734375,
+            "bright_source": 0.0078125,
+            "earth_limb": 0.00390625
+          },
+          "confidence": 0.9609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 4,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.89453125,
+            "starfield": 0.07421875,
+            "bright_source": 0.02734375,
+            "earth_limb": 0.0078125
+          },
+          "confidence": 0.89453125,
+          "correct": true
+        },
+        {
+          "frame_idx": 5,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.99609375,
+            "starfield": 0.0,
+            "bright_source": 0.0,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        }
+      ],
+      "correct": 6,
+      "total": 6,
+      "accuracy": 1.0
+    },
+    {
+      "name": "Empty Starfield (should NOT trigger)",
+      "frames": [
+        {
+          "frame_idx": 0,
+          "true_label": 1,
+          "true_class": "starfield",
+          "pred_label": 1,
+          "pred_class": "starfield",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.9921875,
+            "bright_source": 0.00390625,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.9921875,
+          "correct": true
+        },
+        {
+          "frame_idx": 1,
+          "true_label": 1,
+          "true_class": "starfield",
+          "pred_label": 1,
+          "pred_class": "starfield",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.99609375,
+            "bright_source": 0.0,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 2,
+          "true_label": 1,
+          "true_class": "starfield",
+          "pred_label": 1,
+          "pred_class": "starfield",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.99609375,
+            "bright_source": 0.0,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 3,
+          "true_label": 1,
+          "true_class": "starfield",
+          "pred_label": 1,
+          "pred_class": "starfield",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.9921875,
+            "bright_source": 0.0078125,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.9921875,
+          "correct": true
+        },
+        {
+          "frame_idx": 4,
+          "true_label": 1,
+          "true_class": "starfield",
+          "pred_label": 1,
+          "pred_class": "starfield",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.99609375,
+            "bright_source": 0.0,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 5,
+          "true_label": 1,
+          "true_class": "starfield",
+          "pred_label": 1,
+          "pred_class": "starfield",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.99609375,
+            "bright_source": 0.0,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        }
+      ],
+      "correct": 6,
+      "total": 6,
+      "accuracy": 1.0
+    },
+    {
+      "name": "Earth Limb Passage (should NOT trigger)",
+      "frames": [
+        {
+          "frame_idx": 0,
+          "true_label": 3,
+          "true_class": "earth_limb",
+          "pred_label": 3,
+          "pred_class": "earth_limb",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.0,
+            "earth_limb": 0.99609375
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 1,
+          "true_label": 3,
+          "true_class": "earth_limb",
+          "pred_label": 3,
+          "pred_class": "earth_limb",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.0,
+            "earth_limb": 0.99609375
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 2,
+          "true_label": 3,
+          "true_class": "earth_limb",
+          "pred_label": 3,
+          "pred_class": "earth_limb",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.0,
+            "earth_limb": 0.99609375
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 3,
+          "true_label": 3,
+          "true_class": "earth_limb",
+          "pred_label": 3,
+          "pred_class": "earth_limb",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.0,
+            "earth_limb": 0.99609375
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        },
+        {
+          "frame_idx": 4,
+          "true_label": 3,
+          "true_class": "earth_limb",
+          "pred_label": 3,
+          "pred_class": "earth_limb",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.03125,
+            "earth_limb": 0.96875
+          },
+          "confidence": 0.96875,
+          "correct": true
+        },
+        {
+          "frame_idx": 5,
+          "true_label": 3,
+          "true_class": "earth_limb",
+          "pred_label": 3,
+          "pred_class": "earth_limb",
+          "probabilities": {
+            "transient": 0.0,
+            "starfield": 0.0,
+            "bright_source": 0.0,
+            "earth_limb": 0.99609375
+          },
+          "confidence": 0.99609375,
+          "correct": true
+        }
+      ],
+      "correct": 6,
+      "total": 6,
+      "accuracy": 1.0
+    },
+    {
+      "name": "Faint Comet (should trigger)",
+      "frames": [
+        {
+          "frame_idx": 0,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.90234375,
+            "starfield": 0.01953125,
+            "bright_source": 0.07421875,
+            "earth_limb": 0.00390625
+          },
+          "confidence": 0.90234375,
+          "correct": true
+        },
+        {
+          "frame_idx": 1,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.94140625,
+            "starfield": 0.0390625,
+            "bright_source": 0.01171875,
+            "earth_limb": 0.0078125
+          },
+          "confidence": 0.94140625,
+          "correct": true
+        },
+        {
+          "frame_idx": 2,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.50390625,
+            "starfield": 0.26953125,
+            "bright_source": 0.1953125,
+            "earth_limb": 0.03125
+          },
+          "confidence": 0.50390625,
+          "correct": true
+        },
+        {
+          "frame_idx": 3,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.5234375,
+            "starfield": 0.01171875,
+            "bright_source": 0.44921875,
+            "earth_limb": 0.015625
+          },
+          "confidence": 0.5234375,
+          "correct": true
+        },
+        {
+          "frame_idx": 4,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.9765625,
+            "starfield": 0.015625,
+            "bright_source": 0.0078125,
+            "earth_limb": 0.0
+          },
+          "confidence": 0.9765625,
+          "correct": true
+        },
+        {
+          "frame_idx": 5,
+          "true_label": 0,
+          "true_class": "transient",
+          "pred_label": 0,
+          "pred_class": "transient",
+          "probabilities": {
+            "transient": 0.96875,
+            "starfield": 0.0234375,
+            "bright_source": 0.0078125,
+            "earth_limb": 0.00390625
+          },
+          "confidence": 0.96875,
+          "correct": true
+        }
+      ],
+      "correct": 6,
+      "total": 6,
+      "accuracy": 1.0
+    }
+  ],
+  "overall_accuracy": 0.95,
+  "total_correct": 38,
+  "total_frames": 40,
+  "false_positive_rate": 0.0,
+  "false_negative_rate": 0.1,
+  "class_names": [
+    "transient",
+    "starfield",
+    "bright_source",
+    "earth_limb"
+  ]
+}

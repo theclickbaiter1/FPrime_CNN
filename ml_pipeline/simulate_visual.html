@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSED — Transient Space Event Detector Simulation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-primary: #0a0a1a;
+    --bg-secondary: #12122a;
+    --bg-card: #1a1a3e;
+    --bg-card-hover: #222255;
+    --text-primary: #e8e8f0;
+    --text-secondary: #8888aa;
+    --text-dim: #555577;
+    --accent-green: #00ff88;
+    --accent-red: #ff4466;
+    --accent-blue: #4488ff;
+    --accent-orange: #ffaa44;
+    --accent-purple: #aa66ff;
+    --border: #2a2a4a;
+    --glass: rgba(255, 255, 255, 0.03);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(68, 136, 255, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(170, 102, 255, 0.04) 0%, transparent 50%),
+      linear-gradient(rgba(42, 42, 74, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42, 42, 74, 0.15) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem; position: relative; z-index: 1; }
+
+  header {
+    text-align: center; padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border); margin-bottom: 2rem;
+  }
+
+  header h1 {
+    font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-green));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+  }
+
+  header p { color: var(--text-secondary); font-size: 0.95rem; font-weight: 300; }
+
+  .metrics-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2.5rem;
+  }
+
+  .metric-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.3rem; text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .metric-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .metric-value { font-size: 2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+  .metric-value.green { color: var(--accent-green); }
+  .metric-value.red { color: var(--accent-red); }
+  .metric-value.blue { color: var(--accent-blue); }
+  .metric-value.orange { color: var(--accent-orange); }
+
+  .scenario-section { margin-bottom: 2rem; }
+  .scenario-section h2 {
+    font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  .badge.pass { background: rgba(0, 255, 136, 0.15); color: var(--accent-green); border: 1px solid rgba(0, 255, 136, 0.3); }
+  .badge.fail { background: rgba(255, 68, 102, 0.15); color: var(--accent-red); border: 1px solid rgba(255, 68, 102, 0.3); }
+
+  .frames-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .frame-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.8rem; transition: all 0.2s;
+  }
+
+  .frame-card:hover { border-color: var(--accent-blue); background: var(--bg-card-hover); }
+  .frame-card.correct { border-left: 3px solid var(--accent-green); }
+  .frame-card.incorrect { border-left: 3px solid var(--accent-red); }
+
+  .frame-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 0.5rem; font-size: 0.8rem;
+  }
+
+  .frame-header .label { color: var(--text-secondary); }
+  .frame-header .conf { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .frame-header .conf.high { color: var(--accent-green); }
+  .frame-header .conf.med { color: var(--accent-orange); }
+  .frame-header .conf.low { color: var(--accent-red); }
+
+  .prob-bars { display: flex; flex-direction: column; gap: 3px; }
+
+  .prob-row {
+    display: flex; align-items: center; gap: 6px; font-size: 0.72rem;
+  }
+
+  .prob-label { width: 80px; text-align: right; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+
+  .prob-bar-bg {
+    flex: 1; height: 14px; background: rgba(255,255,255,0.05);
+    border-radius: 3px; overflow: hidden; position: relative;
+  }
+
+  .prob-bar-fill {
+    height: 100%; border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .prob-pct {
+    width: 40px; text-align: right; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem; color: var(--text-dim);
+  }
+
+  .class-transient .prob-bar-fill { background: linear-gradient(90deg, #ff4444, #ff6666); }
+  .class-starfield .prob-bar-fill { background: linear-gradient(90deg, #44cc44, #66ee66); }
+  .class-bright_source .prob-bar-fill { background: linear-gradient(90deg, #ffaa00, #ffcc44); }
+  .class-earth_limb .prob-bar-fill { background: linear-gradient(90deg, #4488ff, #66aaff); }
+
+  .pred-line {
+    display: flex; justify-content: space-between; margin-top: 6px;
+    font-size: 0.75rem; padding-top: 6px; border-top: 1px solid var(--border);
+  }
+
+  .pred-line .true-lbl { color: var(--text-secondary); }
+  .pred-line .pred-lbl { font-weight: 600; }
+
+  .scenario-acc {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    font-size: 1rem; margin-left: auto;
+  }
+
+  footer {
+    text-align: center; padding: 2rem 0; margin-top: 2rem;
+    border-top: 1px solid var(--border); color: var(--text-dim); font-size: 0.8rem;
+  }
+
+  .loading { text-align: center; padding: 4rem; color: var(--text-secondary); }
+
+  @media (max-width: 768px) {
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .frames-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="container">
+  <header>
+    <h1>Transient Space Event Detector</h1>
+    <p>INT8 Quantized CNN Simulation Results — RP2350 Target</p>
+  </header>
+
+  <div id="metrics" class="metrics-grid"></div>
+  <div id="scenarios"></div>
+
+  <footer>
+    <p>TSED — Transient Space Event Detector &bull; CNN INT8 &bull; 64&times;64 Grayscale &bull; RP2350</p>
+  </footer>
+</div>
+
+<script id="sim-data" type="application/json">{"scenarios": [{"name": "Asteroid Flyby", "frames": [{"frame_idx": 0, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.99609375, "starfield": 0.0, "bright_source": 0.0, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 1, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.68359375, "starfield": 0.046875, "bright_source": 0.2265625, "earth_limb": 0.0390625}, "confidence": 0.68359375, "correct": true}, {"frame_idx": 2, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.99609375, "starfield": 0.0, "bright_source": 0.0, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 3, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.9609375, "starfield": 0.02734375, "bright_source": 0.0078125, "earth_limb": 0.00390625}, "confidence": 0.9609375, "correct": true}, {"frame_idx": 4, "true_label": 0, "true_class": "transient", "pred_label": 2, "pred_class": "bright_source", "probabilities": {"transient": 0.44140625, "starfield": 0.02734375, "bright_source": 0.515625, "earth_limb": 0.015625}, "confidence": 0.515625, "correct": false}, {"frame_idx": 5, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.8984375, "starfield": 0.0625, "bright_source": 0.02734375, "earth_limb": 0.01171875}, "confidence": 0.8984375, "correct": true}, {"frame_idx": 6, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.93359375, "starfield": 0.046875, "bright_source": 0.01171875, "earth_limb": 0.0078125}, "confidence": 0.93359375, "correct": true}, {"frame_idx": 7, "true_label": 0, "true_class": "transient", "pred_label": 2, "pred_class": "bright_source", "probabilities": {"transient": 0.16796875, "starfield": 0.01171875, "bright_source": 0.80859375, "earth_limb": 0.01171875}, "confidence": 0.80859375, "correct": false}], "correct": 6, "total": 8, "accuracy": 0.75}, {"name": "Sun Crossing (should NOT trigger)", "frames": [{"frame_idx": 0, "true_label": 2, "true_class": "bright_source", "pred_label": 2, "pred_class": "bright_source", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.99609375, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 1, "true_label": 2, "true_class": "bright_source", "pred_label": 2, "pred_class": "bright_source", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.99609375, "earth_limb": 0.00390625}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 2, "true_label": 2, "true_class": "bright_source", "pred_label": 2, "pred_class": "bright_source", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.99609375, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 3, "true_label": 2, "true_class": "bright_source", "pred_label": 2, "pred_class": "bright_source", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.99609375, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 4, "true_label": 2, "true_class": "bright_source", "pred_label": 2, "pred_class": "bright_source", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.99609375, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 5, "true_label": 2, "true_class": "bright_source", "pred_label": 2, "pred_class": "bright_source", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.99609375, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 6, "true_label": 2, "true_class": "bright_source", "pred_label": 2, "pred_class": "bright_source", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.99609375, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 7, "true_label": 2, "true_class": "bright_source", "pred_label": 2, "pred_class": "bright_source", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.99609375, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}], "correct": 8, "total": 8, "accuracy": 1.0}, {"name": "Debris Field", "frames": [{"frame_idx": 0, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.9453125, "starfield": 0.03515625, "bright_source": 0.01171875, "earth_limb": 0.0078125}, "confidence": 0.9453125, "correct": true}, {"frame_idx": 1, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.87890625, "starfield": 0.08203125, "bright_source": 0.0234375, "earth_limb": 0.01171875}, "confidence": 0.87890625, "correct": true}, {"frame_idx": 2, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.80078125, "starfield": 0.08984375, "bright_source": 0.08984375, "earth_limb": 0.0234375}, "confidence": 0.80078125, "correct": true}, {"frame_idx": 3, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.9609375, "starfield": 0.02734375, "bright_source": 0.0078125, "earth_limb": 0.00390625}, "confidence": 0.9609375, "correct": true}, {"frame_idx": 4, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.89453125, "starfield": 0.07421875, "bright_source": 0.02734375, "earth_limb": 0.0078125}, "confidence": 0.89453125, "correct": true}, {"frame_idx": 5, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.99609375, "starfield": 0.0, "bright_source": 0.0, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}], "correct": 6, "total": 6, "accuracy": 1.0}, {"name": "Empty Starfield (should NOT trigger)", "frames": [{"frame_idx": 0, "true_label": 1, "true_class": "starfield", "pred_label": 1, "pred_class": "starfield", "probabilities": {"transient": 0.0, "starfield": 0.9921875, "bright_source": 0.00390625, "earth_limb": 0.0}, "confidence": 0.9921875, "correct": true}, {"frame_idx": 1, "true_label": 1, "true_class": "starfield", "pred_label": 1, "pred_class": "starfield", "probabilities": {"transient": 0.0, "starfield": 0.99609375, "bright_source": 0.0, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 2, "true_label": 1, "true_class": "starfield", "pred_label": 1, "pred_class": "starfield", "probabilities": {"transient": 0.0, "starfield": 0.99609375, "bright_source": 0.0, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 3, "true_label": 1, "true_class": "starfield", "pred_label": 1, "pred_class": "starfield", "probabilities": {"transient": 0.0, "starfield": 0.9921875, "bright_source": 0.0078125, "earth_limb": 0.0}, "confidence": 0.9921875, "correct": true}, {"frame_idx": 4, "true_label": 1, "true_class": "starfield", "pred_label": 1, "pred_class": "starfield", "probabilities": {"transient": 0.0, "starfield": 0.99609375, "bright_source": 0.0, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 5, "true_label": 1, "true_class": "starfield", "pred_label": 1, "pred_class": "starfield", "probabilities": {"transient": 0.0, "starfield": 0.99609375, "bright_source": 0.0, "earth_limb": 0.0}, "confidence": 0.99609375, "correct": true}], "correct": 6, "total": 6, "accuracy": 1.0}, {"name": "Earth Limb Passage (should NOT trigger)", "frames": [{"frame_idx": 0, "true_label": 3, "true_class": "earth_limb", "pred_label": 3, "pred_class": "earth_limb", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.0, "earth_limb": 0.99609375}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 1, "true_label": 3, "true_class": "earth_limb", "pred_label": 3, "pred_class": "earth_limb", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.0, "earth_limb": 0.99609375}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 2, "true_label": 3, "true_class": "earth_limb", "pred_label": 3, "pred_class": "earth_limb", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.0, "earth_limb": 0.99609375}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 3, "true_label": 3, "true_class": "earth_limb", "pred_label": 3, "pred_class": "earth_limb", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.0, "earth_limb": 0.99609375}, "confidence": 0.99609375, "correct": true}, {"frame_idx": 4, "true_label": 3, "true_class": "earth_limb", "pred_label": 3, "pred_class": "earth_limb", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.03125, "earth_limb": 0.96875}, "confidence": 0.96875, "correct": true}, {"frame_idx": 5, "true_label": 3, "true_class": "earth_limb", "pred_label": 3, "pred_class": "earth_limb", "probabilities": {"transient": 0.0, "starfield": 0.0, "bright_source": 0.0, "earth_limb": 0.99609375}, "confidence": 0.99609375, "correct": true}], "correct": 6, "total": 6, "accuracy": 1.0}, {"name": "Faint Comet (should trigger)", "frames": [{"frame_idx": 0, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.90234375, "starfield": 0.01953125, "bright_source": 0.07421875, "earth_limb": 0.00390625}, "confidence": 0.90234375, "correct": true}, {"frame_idx": 1, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.94140625, "starfield": 0.0390625, "bright_source": 0.01171875, "earth_limb": 0.0078125}, "confidence": 0.94140625, "correct": true}, {"frame_idx": 2, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.50390625, "starfield": 0.26953125, "bright_source": 0.1953125, "earth_limb": 0.03125}, "confidence": 0.50390625, "correct": true}, {"frame_idx": 3, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.5234375, "starfield": 0.01171875, "bright_source": 0.44921875, "earth_limb": 0.015625}, "confidence": 0.5234375, "correct": true}, {"frame_idx": 4, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.9765625, "starfield": 0.015625, "bright_source": 0.0078125, "earth_limb": 0.0}, "confidence": 0.9765625, "correct": true}, {"frame_idx": 5, "true_label": 0, "true_class": "transient", "pred_label": 0, "pred_class": "transient", "probabilities": {"transient": 0.96875, "starfield": 0.0234375, "bright_source": 0.0078125, "earth_limb": 0.00390625}, "confidence": 0.96875, "correct": true}], "correct": 6, "total": 6, "accuracy": 1.0}], "overall_accuracy": 0.95, "total_correct": 38, "total_frames": 40, "false_positive_rate": 0.0, "false_negative_rate": 0.1, "class_names": ["transient", "starfield", "bright_source", "earth_limb"]}</script>
+<script>
+async function loadResults() {
+  let data;
+  // Try embedded data first
+  const embedded = document.getElementById('sim-data').textContent.trim();
+  if (embedded) {
+    try { data = JSON.parse(embedded); } catch(e) {}
+  }
+  // Fall back to fetch
+  if (!data) {
+    try {
+      const r = await fetch('output/simulation/simulation_results.json');
+      data = await r.json();
+    } catch(e) {
+      try {
+        const r2 = await fetch('simulation_results.json');
+        data = await r2.json();
+      } catch(e2) {
+        document.getElementById('scenarios').innerHTML =
+          '<div class="loading">Could not load simulation_results.json. Run simulate.py first.</div>';
+        return;
+      }
+    }
+  }
+  renderDashboard(data);
+}
+
+function renderDashboard(data) {
+  // Metrics
+  const metricsEl = document.getElementById('metrics');
+  const accPct = (data.overall_accuracy * 100).toFixed(1);
+  const fpPct = (data.false_positive_rate * 100).toFixed(1);
+  const fnPct = (data.false_negative_rate * 100).toFixed(1);
+  const accClass = data.overall_accuracy >= 0.9 ? 'green' : data.overall_accuracy >= 0.7 ? 'orange' : 'red';
+
+  metricsEl.innerHTML = `
+    <div class="metric-card">
+      <div class="metric-label">Overall Accuracy</div>
+      <div class="metric-value ${accClass}">${accPct}%</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Frames</div>
+      <div class="metric-value blue">${data.total_frames}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">False Positive Rate</div>
+      <div class="metric-value ${parseFloat(fpPct) < 10 ? 'green' : 'red'}">${fpPct}%</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">False Negative Rate</div>
+      <div class="metric-value ${parseFloat(fnPct) < 10 ? 'green' : 'red'}">${fnPct}%</div>
+    </div>
+  `;
+
+  // Scenarios
+  const scenariosEl = document.getElementById('scenarios');
+  scenariosEl.innerHTML = '';
+
+  data.scenarios.forEach((scenario, sIdx) => {
+    const section = document.createElement('div');
+    section.className = 'scenario-section';
+
+    const accVal = (scenario.accuracy * 100).toFixed(0);
+    const passOrFail = scenario.accuracy >= 0.7 ? 'pass' : 'fail';
+    const accColor = scenario.accuracy >= 0.9 ? 'var(--accent-green)' :
+                     scenario.accuracy >= 0.7 ? 'var(--accent-orange)' : 'var(--accent-red)';
+
+    section.innerHTML = `
+      <h2>
+        <span class="badge ${passOrFail}">${passOrFail}</span>
+        ${scenario.name}
+        <span class="scenario-acc" style="color:${accColor}">${accVal}%</span>
+      </h2>
+      <div class="frames-grid" id="frames-${sIdx}"></div>
+    `;
+    scenariosEl.appendChild(section);
+
+    const framesGrid = section.querySelector(`#frames-${sIdx}`);
+    scenario.frames.forEach((frame) => {
+      const card = document.createElement('div');
+      card.className = `frame-card ${frame.correct ? 'correct' : 'incorrect'}`;
+
+      const confVal = (frame.confidence * 100).toFixed(1);
+      const confClass = frame.confidence >= 0.8 ? 'high' : frame.confidence >= 0.5 ? 'med' : 'low';
+
+      let barsHTML = '';
+      const classNames = data.class_names || ['transient','starfield','bright_source','earth_limb'];
+      classNames.forEach(cls => {
+        const pct = ((frame.probabilities[cls] || 0) * 100).toFixed(1);
+        const widthPct = Math.max(1, Math.abs(frame.probabilities[cls] || 0) * 100);
+        barsHTML += `
+          <div class="prob-row class-${cls}">
+            <span class="prob-label">${cls}</span>
+            <div class="prob-bar-bg"><div class="prob-bar-fill" style="width:${widthPct}%"></div></div>
+            <span class="prob-pct">${pct}%</span>
+          </div>
+        `;
+      });
+
+      card.innerHTML = `
+        <div class="frame-header">
+          <span class="label">Frame ${frame.frame_idx}</span>
+          <span class="conf ${confClass}">${confVal}%</span>
+        </div>
+        <div class="prob-bars">${barsHTML}</div>
+        <div class="pred-line">
+          <span class="true-lbl">True: ${frame.true_class}</span>
+          <span class="pred-lbl" style="color:${frame.correct ? 'var(--accent-green)' : 'var(--accent-red)'}">
+            ${frame.correct ? '✓' : '✗'} ${frame.pred_class}
+          </span>
+        </div>
+      `;
+      framesGrid.appendChild(card);
+    });
+  });
+}
+
+loadResults();
+</script>
+</body>
+</html>

@@ -1,17 +1,26 @@
-# Environments
-venv/
-env/
-.env
-
-# Python
+# Byte-compiled / optimized
 __pycache__/
 *.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+
+# ML outputs
+ml_pipeline/output/
+ml_pipeline/dataset/
 *.h5
 *.tflite
+*.npz
+
+# IDE
+.vscode/
+.idea/
 
 # OS
 .DS_Store
+Thumbs.db
 
-# F Prime Build
-build-fprime/
-fprime-build/
+# TensorFlow logs
+logs/
