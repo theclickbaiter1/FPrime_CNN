@@ -112,6 +112,8 @@ def generate_edge_cases():
     These test edge cases use generate_image() from the training pipeline so
     their statistical properties match what the model was trained on.
     """
+    from generate_dataset import (random_background, add_stars, add_sensor_noise,
+                                  generate_transient, generate_image, augment)
     edge_cases = []
     # Faint transients — use same generator but with added noise
     for _ in range(20):

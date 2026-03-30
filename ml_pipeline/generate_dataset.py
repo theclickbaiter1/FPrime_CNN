@@ -17,6 +17,12 @@ Each image simulates realistic sensor characteristics:
 
 import numpy as np
 import os
+import io
+import time
+import requests
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
 import argparse
 from pathlib import Path
 
@@ -341,7 +347,35 @@ def generate_image(class_idx):
     return img.astype(np.float32)
 
 
-def generate_dataset(n_per_class_train=5000, n_per_class_test=1000, seed=42):
+def load_real_images(base_dir='dataset/real_samples'):
+    """Load real imagery from the download script and heavily augment to expand volume."""
+    real_x = []
+    real_y = []
+    if not os.path.exists(base_dir):
+        return [], []
+        
+    for class_idx, class_name in enumerate(CLASS_NAMES):
+        class_dir = os.path.join(base_dir, class_name)
+        if not os.path.exists(class_dir): continue
+        for fname in os.listdir(class_dir):
+            if not fname.endswith('.png'): continue
+            path = os.path.join(class_dir, fname)
+            img = Image.open(path).convert('L')
+            img_arr = np.array(img, dtype=np.float32) / 255.0
+            
+            # Since we only have ~200 real images per class, we heavily augment them
+            # to boost their relative weight against the 5,000 synthetic ones
+            # We add 8 variations for each real image
+            for _ in range(8):
+                aug_img = augment(img_arr.copy())
+                # also add slight noise jitter to prevent exact duplicate memorization
+                aug_img = np.clip(aug_img + np.random.normal(0, 0.005, aug_img.shape), 0, 1)
+                real_x.append(aug_img)
+                real_y.append(class_idx)
+                
+    return real_x, real_y
+
+def generate_dataset(n_per_class_train=5000, n_per_class_test=1000, seed=42, include_real=True):
     """Generate full train/test dataset."""
     np.random.seed(seed)
     n_classes = len(CLASS_NAMES)
@@ -370,6 +404,24 @@ def generate_dataset(n_per_class_train=5000, n_per_class_test=1000, seed=42):
             img = generate_image(cls_idx)
             x_test_list.append(img)
             y_test_list.append(cls_idx)
+            
+    # Mix in Real Data
+    if include_real:
+        print("  Mixing in real images from dataset/real_samples...")
+        rx, ry = load_real_images()
+        if len(rx) > 0:
+            print(f"  Loaded {len(rx)} augmented real images.")
+            # Split 80/20 train/test
+            p = np.random.permutation(len(rx))
+            rx = np.array(rx)[p]
+            ry = np.array(ry)[p]
+            split_idx = int(len(rx) * 0.8)
+            x_train_list.extend(rx[:split_idx])
+            y_train_list.extend(ry[:split_idx])
+            x_test_list.extend(rx[split_idx:])
+            y_test_list.extend(ry[split_idx:])
+        else:
+            print("  No real images found. Continuing with purely synthetic data.")
 
     # Shuffle
     x_train = np.array(x_train_list)
