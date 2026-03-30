@@ -17,29 +17,25 @@ namespace Components {
             void init(const NATIVE_INT_TYPE queueDepth, const NATIVE_INT_TYPE instance = 0);
 
         protected:
-            // ----------------------------------------------------------------------
-            // Handler implementations for user-defined typed input ports
-            // ----------------------------------------------------------------------
+            // Handler for incoming 64x64 grayscale image buffers
             void imageIn_handler(
                 const NATIVE_INT_TYPE portNum,
                 Fw::Buffer &fwBuffer
             ) override;
 
         private:
-            // ----------------------------------------------------------------------
-            // TensorFlow Lite Micro variables
-            // ----------------------------------------------------------------------
+            // TensorFlow Lite Micro runtime objects
             const tflite::Model* m_model;
             tflite::MicroInterpreter* m_interpreter;
 
-            // Tensor Arena (Memory budget to fit intermediate features & weights)
-            // Assigned 120KB to be safely within the 150KB limit bounds for the RP2350
+            // Tensor Arena — memory budget for intermediate activations and weights
+            // 120 KB fits within RP2350's 520 KB SRAM, leaving ~400 KB for F Prime services
             constexpr static int kTensorArenaSize = 120 * 1024;
             alignas(16) uint8_t m_tensor_arena[kTensorArenaSize];
 
-            // TFLite Resolver holds the subset of operations the MCU supports
-            // Count must cover: Conv2D, DepthwiseConv2D, AveragePool2D, Reshape, FullyConnected, Softmax
-            tflite::MicroMutableOpResolver<6> m_op_resolver;
+            // Op Resolver — 8 ops needed for QAT INT8 model:
+            // Conv2D, DepthwiseConv2D, AvgPool, Reshape, FC, Softmax, Quantize, Dequantize
+            tflite::MicroMutableOpResolver<8> m_op_resolver;
     };
 
 } // end namespace Components

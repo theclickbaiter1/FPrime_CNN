@@ -1,35 +1,38 @@
 module Components {
 
-    @ Component predicting transient events via CNN TFLite logic
+    @ CNN-based transient space event detector using TFLite Micro on RP2350
     active component TransientDetector {
 
         // ----------------------------------------------------------------------
         // Ports
         // ----------------------------------------------------------------------
 
-        @ Input port to receive raw 64x64 grayscale buffer.
+        @ Input port to receive raw 64x64 grayscale image buffer from camera
         async input port imageIn: Fw.BufferSend
 
-        @ Output port to return the original buffer when done
+        @ Output port to return the original buffer when inference is complete
         output port imageOut: Fw.BufferSend
 
         // ----------------------------------------------------------------------
         // Telemetry
         // ----------------------------------------------------------------------
 
-        @ Confidence score that a transient event is present 
+        @ Confidence score that a transient event is present (class 0 probability)
         telemetry ConfidenceScore: F32
+
+        @ Detected class index (0=transient, 1=starfield, 2=bright_source, 3=earth_limb)
+        telemetry DetectedClass: U8
 
         // ----------------------------------------------------------------------
         // Events
         // ----------------------------------------------------------------------
 
-        @ Event indicating a potential transient was detected
+        @ A transient event was detected with high confidence
         event TransientDetected(
             confidence: F32
         ) \
         severity activity high \
-        format "Transient event detected with confidence {}"
+        format "TRANSIENT EVENT DETECTED — confidence: {}"
 
     }
 }
